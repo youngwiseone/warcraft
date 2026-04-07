@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>WoW Classic Blog Backpack</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="css/style.css" />
+    <script defer src="js/blog.js"></script>
+  </head>
+  <body>
+    <header class="header-bar">
+      <h1>Adventurer's Backpack</h1>
+      <p class="subtitle">
+        Click an item to read a quest-style blog post. Items in grayscale are
+        coming soon.
+      </p>
+    </header>
+    <main id="backpack"></main>
+    <!-- Quest style pop-up -->
+    <div id="quest-box" class="hidden">
+      <div class="quest-content">
+        <h2 id="quest-title"></h2>
+        <p id="quest-text"></p>
+        <button id="close-quest">Close</button>
+      </div>
+    </div>
+  </body>
+</html>
