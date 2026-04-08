@@ -316,7 +316,7 @@ body {
   box-shadow:
     0 10px 18px rgba(0, 0, 0, 0.3),
     inset 0 0 0 1px rgba(255, 231, 188, 0.08);
-  overflow: hidden;
+  overflow: visible;
   cursor: var(--warcraft-cursor-action);
   transition: transform 0.16s ease, border-color 0.16s ease, box-shadow 0.16s ease;
 }
@@ -359,11 +359,12 @@ body {
   outline-offset: 3px;
 }
 
-.slot img {
+.slot-art {
   display: block;
   width: 100%;
   height: 100%;
   object-fit: cover;
+  border-radius: 10px;
   filter: saturate(0.95) contrast(1.04);
 }
 
@@ -408,7 +409,7 @@ body {
     inset 0 0 0 1px rgba(255, 231, 188, 0.1);
 }
 
-.slot.coming-soon img {
+.slot.coming-soon .slot-art {
   filter: grayscale(0.9) saturate(0.4) brightness(0.75);
 }
 
@@ -421,6 +422,17 @@ body {
   color: #bba98c;
   font-size: 0.92rem;
   line-height: 1.45;
+}
+
+.slot-quest-marker {
+  position: absolute;
+  top: 10px;
+  right: 6px;
+  width: 60px;
+  height: 60px;
+  z-index: 3;
+  object-fit: contain;
+  filter: drop-shadow(0 3px 6px rgba(0, 0, 0, 0.55));
 }
 
 #quest-box.quest-panel {
@@ -570,6 +582,100 @@ body {
 
 .quest-panel.is-coming-soon .quest-label {
   color: rgba(117, 70, 29, 0.82);
+}
+
+.experience-panel {
+  width: min(1180px, 100%);
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 8px 6px 2px;
+}
+
+.experience-level-wrap {
+  min-width: 112px;
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  color: #f4dba0;
+  text-shadow:
+    0 2px 0 rgba(0, 0, 0, 0.8),
+    0 0 10px rgba(0, 0, 0, 0.45);
+}
+
+.experience-level-label {
+  font-size: 0.86rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #cdb98d;
+}
+
+.experience-level-value {
+  font-size: clamp(1.3rem, 2vw, 1.8rem);
+  font-weight: 700;
+  line-height: 1;
+}
+
+.experience-bar-shell {
+  flex: 1;
+  min-width: 0;
+}
+
+.experience-bar-track {
+  position: relative;
+  height: 24px;
+  border: 2px solid rgba(123, 113, 103, 0.9);
+  border-radius: 8px;
+  overflow: hidden;
+  background:
+    linear-gradient(180deg, rgba(16, 16, 16, 0.96), rgba(47, 47, 47, 0.98)),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.04), transparent);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.12),
+    inset 0 -2px 6px rgba(0, 0, 0, 0.55),
+    0 6px 12px rgba(0, 0, 0, 0.28);
+}
+
+.experience-bar-fill {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 0%;
+  background:
+    linear-gradient(180deg, #2d8dff, #145ec0 38%, #0b3472 72%, #041227),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.28), transparent 38%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.2),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.34),
+    0 0 18px rgba(27, 115, 255, 0.22);
+  transition: width 0.35s ease;
+}
+
+.experience-bar-segments {
+  position: absolute;
+  inset: 0;
+  background:
+    repeating-linear-gradient(
+      90deg,
+      transparent 0,
+      transparent calc(16.6667% - 2px),
+      rgba(182, 174, 163, 0.72) calc(16.6667% - 2px),
+      rgba(182, 174, 163, 0.72) 16.6667%
+    );
+  mix-blend-mode: screen;
+  pointer-events: none;
+}
+
+.experience-text {
+  margin: 6px 0 0;
+  color: #cab892;
+  font-size: 0.84rem;
+  letter-spacing: 0.08em;
+  text-align: right;
+  text-transform: uppercase;
+}
+
+.blog-logout-button {
+  flex: 0 0 auto;
 }
 
 .hidden {
@@ -804,10 +910,6 @@ body {
     padding: 16px 16px 18px;
   }
 
-  .blog-logout-button {
-    align-self: center;
-  }
-
   .board-body {
     grid-template-columns: 1fr;
   }
@@ -818,6 +920,20 @@ body {
 
   .quest-content {
     min-height: 360px;
+  }
+
+  .experience-panel {
+    align-items: stretch;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .experience-level-wrap {
+    min-width: 0;
+  }
+
+  .blog-logout-button {
+    align-self: flex-end;
   }
 
   .quest-modal {
@@ -861,6 +977,18 @@ body {
 
   .quest-overlay {
     padding: 14px 10px;
+  }
+
+  .experience-panel {
+    padding: 4px 0 0;
+  }
+
+  .experience-level-wrap {
+    justify-content: flex-start;
+  }
+
+  .blog-logout-button {
+    align-self: stretch;
   }
 
   .quest-modal {

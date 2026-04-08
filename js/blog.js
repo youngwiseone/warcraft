@@ -12,17 +12,24 @@ document.addEventListener('DOMContentLoaded', () => {
   const questMarkdown = document.getElementById('quest-markdown');
   const completeQuestBtn = document.getElementById('complete-quest');
   const cancelQuestBtn = document.getElementById('cancel-quest');
+  const experienceLevel = document.getElementById('experience-level');
+  const experienceBarFill = document.getElementById('experience-bar-fill');
+  const experienceText = document.getElementById('experience-text');
   const logoutButton = document.querySelector('.logout-button');
   const murlocSurprise = document.getElementById('murloc-surprise');
 
   const embeddedMarkdown = globalThis.POST_MARKDOWN || {};
   const markdownCache = new Map();
+  const progressStorageKey = 'warcraft-blog-progress';
+  const experiencePerQuest = 100;
+  const experiencePerLevel = 300;
   const soundPaths = {
     open: 'sounds/open.ogg',
     complete: 'sounds/complete.ogg',
     exit: 'sounds/exit.ogg',
     select: 'sounds/select.ogg',
     murloc: 'sounds/murloc.ogg',
+    levelup: 'sounds/levelup.ogg',
   };
   const soundEffects = Object.fromEntries(
     Object.entries(soundPaths).map(([key, path]) => {
@@ -84,8 +91,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
   let activePost = null;
   let activeSlot = null;
+  let openQuestPostId = null;
   let clickTimestamps = [];
   let murlocHideTimer = null;
+  let slotElements = new Map();
+  let completedPostIds = new Set();
   let posts = [];
 
   readQuestBtn.disabled = true;
@@ -93,6 +103,67 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function getMarkdownPath(id) {
     return `posts/${id}.md`;
+  }
+
+  function loadProgress() {
+    try {
+      const rawProgress = window.localStorage.getItem(progressStorageKey);
+
+      if (!rawProgress) {
+        return new Set();
+      }
+
+      const parsedProgress = JSON.parse(rawProgress);
+      const ids = Array.isArray(parsedProgress.completedPostIds) ? parsedProgress.completedPostIds : [];
+      const knownPostIds = new Set(postDefinitions.map(({ id }) => id));
+
+      return new Set(ids.filter((id) => typeof id === 'string' && knownPostIds.has(id)));
+    } catch (error) {
+      return new Set();
+    }
+  }
+
+  function saveProgress() {
+    try {
+      window.localStorage.setItem(
+        progressStorageKey,
+        JSON.stringify({
+          completedPostIds: [...completedPostIds],
+        })
+      );
+    } catch (error) {
+      // Ignore storage failures so the page remains usable.
+    }
+  }
+
+  function getExperienceProgress() {
+    const totalExperience = completedPostIds.size * experiencePerQuest;
+    const level = Math.floor(totalExperience / experiencePerLevel) + 1;
+    const currentLevelExperience = totalExperience % experiencePerLevel;
+
+    return {
+      totalExperience,
+      level,
+      currentLevelExperience,
+      nextLevelExperience: experiencePerLevel,
+    };
+  }
+
+  function updateExperienceDisplay() {
+    const progress = getExperienceProgress();
+    const fillPercentage = (progress.currentLevelExperience / progress.nextLevelExperience) * 100;
+
+    if (experienceLevel) {
+      experienceLevel.textContent = String(progress.level);
+    }
+
+    if (experienceBarFill) {
+      experienceBarFill.style.width = `${fillPercentage}%`;
+    }
+
+    if (experienceText) {
+      experienceText.textContent = `${progress.currentLevelExperience} / ${progress.nextLevelExperience} XP`;
+    }
   }
 
   function playSound(name) {
@@ -116,6 +187,46 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
+  function syncSlotQuestMarker(slot, post) {
+    const existingMarker = slot.querySelector('.slot-quest-marker');
+
+    if (existingMarker) {
+      existingMarker.remove();
+    }
+
+    if (!post.available || completedPostIds.has(post.id)) {
+      return;
+    }
+
+    const marker = document.createElement('img');
+    marker.className = 'slot-quest-marker';
+    marker.src = 'assets/quest_icon.png';
+    marker.alt = '';
+    marker.setAttribute('aria-hidden', 'true');
+    slot.appendChild(marker);
+  }
+
+  function markPostCompleted(postId) {
+    if (completedPostIds.has(postId)) {
+      return false;
+    }
+
+    const previousProgress = getExperienceProgress();
+
+    completedPostIds.add(postId);
+    saveProgress();
+    updateExperienceDisplay();
+
+    const slot = slotElements.get(postId);
+    const post = posts.find((entry) => entry.id === postId);
+
+    if (slot && post) {
+      syncSlotQuestMarker(slot, post);
+    }
+
+    return getExperienceProgress().level > previousProgress.level;
+  }
+
   function showMurlocSurprise() {
     if (!murlocSurprise) {
       return;
@@ -133,7 +244,7 @@ document.addEventListener('DOMContentLoaded', () => {
       murlocSurprise.classList.remove('is-visible');
       murlocSurprise.setAttribute('aria-hidden', 'true');
       murlocHideTimer = null;
-    }, 4000);
+    }, 2500);
   }
 
   function escapeHtml(text) {
@@ -399,6 +510,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function closeQuestOverlay() {
+    openQuestPostId = null;
     questOverlay.classList.add('hidden');
     questOverlay.setAttribute('aria-hidden', 'true');
     document.body.classList.remove('overlay-open');
@@ -415,6 +527,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     questModalTitle.textContent = presentation.title;
     questMarkdown.innerHTML = presentation.html;
+    openQuestPostId = post.id;
     questOverlay.classList.remove('hidden');
     questOverlay.setAttribute('aria-hidden', 'false');
     document.body.classList.add('overlay-open');
@@ -430,6 +543,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     const img = document.createElement('img');
+    img.className = 'slot-art';
     img.src = post.image;
     img.alt = post.title;
     slot.appendChild(img);
@@ -446,6 +560,8 @@ document.addEventListener('DOMContentLoaded', () => {
       slot.appendChild(status);
     }
 
+    syncSlotQuestMarker(slot, post);
+
     slot.addEventListener('click', () => {
       playSound('select');
       setActivePost(post, slot);
@@ -455,10 +571,14 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   async function initializeBlog() {
+    completedPostIds = loadProgress();
     posts = await Promise.all(postDefinitions.map((post) => resolvePost(post)));
+    slotElements = new Map();
+    updateExperienceDisplay();
 
     posts.forEach((post, index) => {
       const slot = createSlot(post);
+      slotElements.set(post.id, slot);
       backpack.appendChild(slot);
 
       if (index === 0) {
@@ -477,7 +597,20 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   completeQuestBtn.addEventListener('click', () => {
+    let leveledUp = false;
+
+    if (openQuestPostId) {
+      leveledUp = markPostCompleted(openQuestPostId);
+    }
+
     playSound('complete');
+
+    if (leveledUp) {
+      window.setTimeout(() => {
+        playSound('levelup');
+      }, 180);
+    }
+
     closeQuestOverlay();
   });
 
