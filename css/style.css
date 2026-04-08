@@ -1,19 +1,25 @@
 /*
- * Global styles for the WoW Classic inspired blog. The design takes cues from
+ * Global styles for the WoW Classic inspired site. The design takes cues from
  * the fantasy world of Azeroth: warm earthy tones, dark wood and leather
- * textures, parchment-like panels and glowing highlights. The "Cinzel" font
- * provides a chiseled look reminiscent of in‑game titles.
+ * textures, parchment-like panels and glowing highlights.
  */
 
 html,
 body {
+  --warcraft-cursor: url('../assets/cursor.png') 0 0, auto;
+  --warcraft-cursor-action: var(--warcraft-cursor);
   margin: 0;
   padding: 0;
   height: 100%;
   font-family: 'Cinzel', serif;
   color: #e8dcc2;
-  /* Apply the custom gauntlet cursor globally */
-  cursor: url('../assets/cursor.png') 0 0, auto;
+  cursor: var(--warcraft-cursor);
+}
+
+*,
+*::before,
+*::after {
+  cursor: var(--warcraft-cursor) !important;
 }
 
 /* Login screen backdrop */
@@ -21,200 +27,853 @@ body {
   position: relative;
   width: 100%;
   height: 100vh;
-  background: url('../assets/login_background.png') no-repeat center center/cover;
   display: flex;
   justify-content: center;
   align-items: center;
   overflow: hidden;
 }
 
-/* Container for canvas and login panel */
+#login-screen::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at center, rgba(0, 0, 0, 0.05), rgba(0, 0, 0, 0.58)),
+    linear-gradient(180deg, rgba(14, 8, 5, 0.32), rgba(14, 8, 5, 0.58));
+  z-index: 1;
+}
+
+#login-video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Container for login panel */
 #login-content {
+  position: relative;
+  z-index: 2;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   gap: 20px;
-  background: rgba(26, 16, 11, 0.65);
-  border: 3px solid #8b5a2b;
-  padding: 30px;
-  border-radius: 12px;
-  box-shadow: 0 0 10px 5px rgba(0, 0, 0, 0.5);
-}
-
-/* Canvas for 3D model */
-#warriorCanvas {
-  width: 300px;
-  height: 380px;
-  display: block;
-  border: 2px solid #8b5a2b;
-  border-radius: 8px;
-  background: rgba(0, 0, 0, 0.3);
+  padding: 30px 24px;
 }
 
 /* Login panel styling */
 .login-panel {
   text-align: center;
-  max-width: 450px;
+  max-width: 560px;
 }
 
 .login-panel h1 {
   margin: 0 0 10px;
-  font-size: 2rem;
-  text-shadow: 2px 2px 4px #000;
+  font-size: clamp(2.3rem, 5vw, 3.75rem);
+  color: #f4d28e;
+  text-shadow:
+    0 4px 14px rgba(0, 0, 0, 0.72),
+    0 2px 0 rgba(31, 18, 12, 0.85);
 }
 
 .login-panel .subtitle {
   margin: 0 0 20px;
-  font-size: 1rem;
-  color: #d8c49a;
+  font-size: 1.05rem;
+  line-height: 1.55;
+  color: #f0dfc0;
+  text-shadow: 0 3px 10px rgba(0, 0, 0, 0.72);
+}
+
+.login-actions {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
 }
 
 #enter-button {
-  padding: 12px 30px;
+  min-width: 132px;
+  padding: 11px 18px;
   font-size: 1rem;
-  font-weight: bold;
-  color: #f5ead0;
-  background: linear-gradient(#7b4b1a, #a67c52);
-  border: 2px solid #d4b885;
-  border-radius: 8px;
-  box-shadow: inset 0 0 5px #000;
-  cursor: pointer;
-  transition: transform 0.1s ease, background 0.3s ease;
+  font-weight: 700;
+  color: #f7cf69;
+  background:
+    linear-gradient(180deg, #7e1a15, #4a0806 68%),
+    radial-gradient(circle at 50% 20%, rgba(255, 220, 160, 0.18), transparent 45%);
+  border: 2px solid #cda04c;
+  border-radius: 12px;
+  box-shadow:
+    0 10px 18px rgba(0, 0, 0, 0.22),
+    inset 0 0 0 1px rgba(255, 225, 173, 0.12);
+  cursor: var(--warcraft-cursor-action);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
 }
 
 #enter-button:hover {
-  transform: scale(1.05);
-  background: linear-gradient(#8a5c2f, #b58a64);
+  color: #f7cf69;
 }
 
-/* Header bar on blog page */
-.header-bar {
-  padding: 20px;
-  background: #2e2015;
-  border-bottom: 4px solid #8b5a2b;
-  text-align: center;
+.secondary-login-button {
+  min-width: 176px;
+  padding: 11px 18px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #f1dfbc;
+  background:
+    linear-gradient(180deg, #5b4636, #2a1d17 68%),
+    radial-gradient(circle at 50% 20%, rgba(255, 235, 196, 0.12), transparent 45%);
+  border: 2px solid #9b8264;
+  border-radius: 12px;
+  box-shadow:
+    0 10px 18px rgba(0, 0, 0, 0.22),
+    inset 0 0 0 1px rgba(255, 225, 173, 0.1);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
 }
 
-.header-bar h1 {
-  margin: 0;
-  font-size: 2rem;
-  color: #f5ead0;
+/* Blog page */
+.blog-page {
+  --blog-gold-soft: #f2d491;
+  min-height: 100%;
+  background:
+    radial-gradient(circle at 50% 8%, rgba(163, 104, 53, 0.16), transparent 30%),
+    linear-gradient(rgba(7, 4, 3, 0.35), rgba(7, 4, 3, 0.75)),
+    repeating-linear-gradient(
+      180deg,
+      #623823 0,
+      #4f2c1c 44px,
+      #2d180f 44px,
+      #2d180f 50px,
+      #6f4228 50px,
+      #4a2818 96px
+    );
+  overflow-x: hidden;
 }
 
-.header-bar .subtitle {
-  margin-top: 8px;
-  font-size: 0.9rem;
-  color: #d4c3a3;
+.blog-page.overlay-open {
+  overflow: hidden;
 }
 
-/* Backpack grid */
-#backpack {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  padding: 20px;
-  background: url('../assets/login_background.png') no-repeat center center/cover;
-  min-height: calc(100vh - 120px);
-}
-
-.slot {
-  width: 150px;
-  height: 150px;
-  margin: 10px;
-  border: 3px solid #8b5a2b;
-  border-radius: 8px;
-  background: rgba(42, 30, 22, 0.85);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  position: relative;
-  transition: transform 0.1s ease;
-}
-
-.slot:hover {
-  transform: scale(1.05);
-}
-
-.slot img {
-  width: 80%;
-  height: 80%;
-  object-fit: cover;
-  border-radius: 4px;
-  border: 2px solid #5d422b;
-}
-
-.slot .coming-label {
-  position: absolute;
-  bottom: 5px;
-  left: 50%;
-  transform: translateX(-50%);
-  background: rgba(0, 0, 0, 0.7);
-  padding: 2px 6px;
-  border-radius: 4px;
-  font-size: 0.7rem;
-  color: #fff;
-}
-
-.slot.coming-soon {
-  opacity: 0.5;
+.blog-page::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background:
+    radial-gradient(circle at center, transparent 50%, rgba(0, 0, 0, 0.48) 100%),
+    linear-gradient(
+      90deg,
+      rgba(0, 0, 0, 0.28),
+      transparent 12%,
+      transparent 88%,
+      rgba(0, 0, 0, 0.28)
+    );
   pointer-events: none;
 }
 
-/* Quest pop-up */
-#quest-box {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.7);
+.blog-shell {
+  position: relative;
+  z-index: 1;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  z-index: 10;
+  gap: 20px;
 }
 
-#quest-box.hidden {
-  display: none;
+.adventure-board {
+  position: relative;
+  width: min(1180px, 100%);
+  padding: 26px;
+  border: 2px solid rgba(214, 188, 146, 0.4);
+  border-radius: 22px;
+  background:
+    linear-gradient(180deg, rgba(45, 32, 24, 0.96), rgba(16, 12, 10, 0.98)),
+    radial-gradient(circle at top, rgba(223, 164, 80, 0.08), transparent 35%);
+  box-shadow:
+    0 30px 60px rgba(0, 0, 0, 0.45),
+    inset 0 0 0 2px rgba(255, 236, 207, 0.07),
+    inset 0 0 48px rgba(245, 179, 86, 0.08);
+  animation: board-rise 0.45s ease-out both;
+}
+
+.adventure-header {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-start;
+  gap: 18px;
+  min-height: 0;
+  margin-bottom: 22px;
+  padding: 14px 18px 18px;
+  border-radius: 16px;
+  background:
+    linear-gradient(180deg, rgba(24, 19, 15, 0.95), rgba(12, 10, 9, 0.98)),
+    linear-gradient(90deg, rgba(255, 212, 142, 0.08), transparent 18%);
+  border: 2px solid rgba(160, 140, 116, 0.4);
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 233, 194, 0.05),
+    inset 0 -18px 36px rgba(0, 0, 0, 0.3);
+}
+
+.adventure-copy {
+  flex: 1;
+  min-width: 0;
+  max-width: 720px;
+}
+
+.adventure-kicker {
+  margin: 0 0 8px;
+  letter-spacing: 0.18em;
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  color: #bea98a;
+}
+
+.adventure-header h1 {
+  margin: 0;
+  color: var(--blog-gold-soft);
+  font-size: clamp(2rem, 4vw, 3rem);
+  font-weight: 700;
+  text-shadow: 0 2px 0 rgba(0, 0, 0, 0.45);
+}
+
+.adventure-header .subtitle {
+  margin: 10px 0 0;
+  max-width: 48ch;
+  color: #ddceb3;
+  font-size: 1rem;
+  line-height: 1.45;
+}
+
+.logout-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 132px;
+  padding: 11px 18px;
+  border: 2px solid #cda04c;
+  border-radius: 12px;
+  background:
+    linear-gradient(180deg, #7e1a15, #4a0806 68%),
+    radial-gradient(circle at 50% 20%, rgba(255, 220, 160, 0.18), transparent 45%);
+  box-shadow:
+    0 10px 18px rgba(0, 0, 0, 0.22),
+    inset 0 0 0 1px rgba(255, 225, 173, 0.12);
+  color: #f7cf69;
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-decoration: none;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.blog-logout-button {
+  align-self: center;
+}
+
+.board-body {
+  display: grid;
+  grid-template-columns: minmax(300px, 1fr) minmax(360px, 1.2fr);
+  gap: 24px;
+  align-items: stretch;
+}
+
+.inventory-panel {
+  padding: 18px;
+  border-radius: 18px;
+  background:
+    linear-gradient(180deg, rgba(36, 27, 21, 0.96), rgba(13, 10, 9, 0.96)),
+    radial-gradient(circle at top left, rgba(231, 173, 84, 0.08), transparent 30%);
+  border: 2px solid rgba(150, 128, 104, 0.38);
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 235, 201, 0.05),
+    inset 0 -20px 30px rgba(0, 0, 0, 0.2);
+}
+
+#backpack.inventory-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.slot {
+  appearance: none;
+  margin: 0;
+  padding: 0;
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  border: 2px solid #857363;
+  border-radius: 12px;
+  background:
+    linear-gradient(180deg, rgba(83, 57, 42, 0.96), rgba(25, 18, 14, 0.98)),
+    radial-gradient(circle at top, rgba(255, 222, 169, 0.12), transparent 36%);
+  box-shadow:
+    0 10px 18px rgba(0, 0, 0, 0.3),
+    inset 0 0 0 1px rgba(255, 231, 188, 0.08);
+  overflow: hidden;
+  cursor: var(--warcraft-cursor-action);
+  transition: transform 0.16s ease, border-color 0.16s ease, box-shadow 0.16s ease;
+}
+
+.slot::before,
+.slot::after {
+  content: '';
+  position: absolute;
+  pointer-events: none;
+}
+
+.slot::before {
+  inset: 6px;
+  border: 1px solid rgba(242, 207, 147, 0.28);
+  border-radius: 8px;
+}
+
+.slot::after {
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.05),
+    transparent 30%,
+    rgba(0, 0, 0, 0.25) 100%
+  );
+}
+
+.slot:hover,
+.slot.is-active {
+  transform: translateY(-4px);
+  border-color: #d4ab59;
+  box-shadow:
+    0 16px 26px rgba(0, 0, 0, 0.42),
+    0 0 0 1px rgba(255, 213, 133, 0.18),
+    inset 0 0 0 1px rgba(255, 235, 199, 0.12);
+}
+
+.slot:focus-visible {
+  outline: 2px solid #f1d79d;
+  outline-offset: 3px;
+}
+
+.slot img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: saturate(0.95) contrast(1.04);
+}
+
+.slot-title,
+.coming-label {
+  position: absolute;
+  left: 8px;
+  right: 8px;
+  border-radius: 8px;
+  text-align: center;
+  text-shadow: 0 2px 3px rgba(0, 0, 0, 0.9);
+}
+
+.slot-title {
+  bottom: 8px;
+  padding: 8px 6px 6px;
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.1), rgba(7, 5, 5, 0.84));
+  color: #f8e2af;
+  font-size: 0.94rem;
+  line-height: 1;
+}
+
+.coming-label {
+  top: 8px;
+  padding: 6px 8px;
+  background: rgba(31, 20, 17, 0.82);
+  color: #f2ddbe;
+  font-size: 0.68rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.slot.coming-soon {
+  filter: grayscale(0.15);
+}
+
+.slot.coming-soon:hover {
+  border-color: #b59a73;
+  box-shadow:
+    0 14px 24px rgba(0, 0, 0, 0.34),
+    0 0 0 1px rgba(220, 192, 148, 0.12),
+    inset 0 0 0 1px rgba(255, 231, 188, 0.1);
+}
+
+.slot.coming-soon img {
+  filter: grayscale(0.9) saturate(0.4) brightness(0.75);
+}
+
+.slot.coming-soon .slot-title {
+  color: #e2d5c1;
+}
+
+.inventory-hint {
+  margin: 18px 4px 0;
+  color: #bba98c;
+  font-size: 0.92rem;
+  line-height: 1.45;
+}
+
+#quest-box.quest-panel {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  padding: 18px;
+  border-radius: 18px;
+  background:
+    linear-gradient(180deg, rgba(45, 31, 23, 0.97), rgba(16, 11, 9, 0.98)),
+    radial-gradient(circle at top, rgba(236, 177, 85, 0.06), transparent 36%);
+  border: 2px solid rgba(160, 136, 112, 0.4);
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 236, 206, 0.05),
+    inset 0 -18px 30px rgba(0, 0, 0, 0.22);
+}
+
+.quest-banner {
+  position: relative;
+  margin: 0 12px -16px;
+  padding: 16px 30px;
+  border-radius: 14px 14px 12px 12px;
+  background:
+    linear-gradient(180deg, #7d5428, #4b2d17 68%, #302017),
+    radial-gradient(circle at top, rgba(255, 222, 165, 0.25), transparent 40%);
+  border: 2px solid #9b7342;
+  box-shadow:
+    0 12px 20px rgba(0, 0, 0, 0.26),
+    inset 0 1px 0 rgba(255, 232, 191, 0.16);
+  z-index: 1;
+}
+
+.quest-banner-title {
+  display: block;
+  color: #f6c661;
+  font-size: clamp(1.55rem, 2.4vw, 2.15rem);
+  font-weight: 700;
+  line-height: 1.1;
+  text-shadow: 0 2px 0 rgba(0, 0, 0, 0.35);
 }
 
 .quest-content {
-  background: #3e2b1a;
-  border: 4px solid #d4b885;
-  border-radius: 10px;
-  padding: 20px;
-  max-width: 600px;
-  width: 90%;
-  color: #f5ead0;
-  box-shadow: 0 0 15px rgba(0, 0, 0, 0.8);
+  flex: 1;
+  position: relative;
+  padding: 44px 28px 28px;
+  border-radius: 18px;
+  background:
+    radial-gradient(circle at top left, rgba(255, 255, 255, 0.28), transparent 34%),
+    linear-gradient(135deg, rgba(116, 74, 33, 0.18), transparent 18%),
+    linear-gradient(180deg, #efdcb5, #d9ba87 70%, #cfab77);
+  border: 2px solid #8f6a3d;
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 244, 221, 0.48),
+    inset 0 24px 34px rgba(255, 255, 255, 0.12),
+    inset 0 -24px 38px rgba(117, 73, 31, 0.16),
+    0 22px 30px rgba(0, 0, 0, 0.26);
 }
 
-.quest-content h2 {
+.quest-label {
+  position: relative;
+  margin: 0;
+  font-size: 0.8rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: rgba(89, 56, 28, 0.7);
+}
+
+.quest-meta {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.quest-date {
+  text-transform: none;
+  letter-spacing: 0.08em;
+}
+
+.quest-content h2,
+#quest-heading {
+  position: relative;
+  margin: 14px 0 16px;
+  color: #2c1b10;
+  font-family: 'Cormorant Garamond', serif;
+  font-size: clamp(2rem, 3vw, 2.6rem);
+  font-weight: 700;
+  line-height: 1.04;
+}
+
+#quest-text {
+  position: relative;
+  margin: 0;
+  color: #2f1c10;
+  font-family: 'Cormorant Garamond', serif;
+  font-size: clamp(1.35rem, 2.1vw, 1.75rem);
+  font-weight: 600;
+  line-height: 1.42;
+  text-wrap: pretty;
+}
+
+.quest-actions {
+  display: flex;
+  justify-content: center;
+  padding: 18px 0 4px;
+}
+
+.accept-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 190px;
+  padding: 12px 28px;
+  border-radius: 12px;
+  border: 2px solid #cda04c;
+  background:
+    linear-gradient(180deg, #7e1a15, #4a0806 68%),
+    radial-gradient(circle at 50% 20%, rgba(255, 220, 160, 0.18), transparent 45%);
+  box-shadow:
+    0 10px 18px rgba(0, 0, 0, 0.22),
+    inset 0 0 0 1px rgba(255, 225, 173, 0.12);
+  color: #f7cf69;
+  font-size: 1.15rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  cursor: var(--warcraft-cursor-action);
+}
+
+.quest-panel.is-coming-soon .quest-banner-title,
+.quest-panel.is-coming-soon .accept-button {
+  color: #e8d5b4;
+}
+
+.accept-button:disabled {
+  border-color: rgba(182, 150, 102, 0.7);
+  background:
+    linear-gradient(180deg, rgba(95, 70, 46, 0.95), rgba(53, 35, 24, 0.98)),
+    radial-gradient(circle at 50% 20%, rgba(255, 220, 160, 0.08), transparent 45%);
+  box-shadow:
+    0 10px 18px rgba(0, 0, 0, 0.16),
+    inset 0 0 0 1px rgba(255, 225, 173, 0.06);
+  color: #dcc8a4;
+  cursor: var(--warcraft-cursor);
+}
+
+.quest-panel.is-coming-soon .quest-label {
+  color: rgba(117, 70, 29, 0.82);
+}
+
+.hidden {
+  display: none !important;
+}
+
+.quest-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 28px 18px;
+}
+
+.quest-overlay-backdrop {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at center, rgba(70, 42, 20, 0.18), rgba(0, 0, 0, 0.7)),
+    rgba(0, 0, 0, 0.54);
+  backdrop-filter: blur(5px);
+  cursor: var(--warcraft-cursor-action);
+}
+
+.quest-modal {
+  position: relative;
+  width: min(920px, 100%);
+  max-height: calc(100vh - 56px);
+  display: flex;
+  flex-direction: column;
+  padding: 18px;
+  border-radius: 18px;
+  background:
+    linear-gradient(180deg, rgba(45, 31, 23, 0.98), rgba(15, 10, 9, 0.99)),
+    radial-gradient(circle at top, rgba(236, 177, 85, 0.08), transparent 36%);
+  border: 2px solid rgba(171, 141, 101, 0.42);
+  box-shadow:
+    0 26px 50px rgba(0, 0, 0, 0.48),
+    inset 0 0 0 1px rgba(255, 236, 206, 0.06);
+  animation: board-rise 0.2s ease-out both;
+}
+
+.quest-modal-banner {
+  margin-bottom: -18px;
+}
+
+.quest-modal-content {
+  overflow: auto;
+  max-height: min(68vh, 780px);
+  padding-bottom: 26px;
+}
+
+.quest-modal-actions {
+  display: flex;
+  justify-content: center;
+  gap: 14px;
+  padding-top: 18px;
+}
+
+.quest-action-button {
+  min-width: 180px;
+  padding: 12px 24px;
+  border: 2px solid #cda04c;
+  border-radius: 12px;
+  background:
+    linear-gradient(180deg, #7e1a15, #4a0806 68%),
+    radial-gradient(circle at 50% 20%, rgba(255, 220, 160, 0.18), transparent 45%);
+  box-shadow:
+    0 10px 18px rgba(0, 0, 0, 0.22),
+    inset 0 0 0 1px rgba(255, 225, 173, 0.12);
+  color: #f7cf69;
+  font-family: 'Cinzel', serif;
+  font-size: 1.02rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  cursor: var(--warcraft-cursor-action);
+}
+
+.quest-action-button-cancel {
+  border-color: #9b8264;
+  background:
+    linear-gradient(180deg, #5b4636, #2a1d17 68%),
+    radial-gradient(circle at 50% 20%, rgba(255, 235, 196, 0.12), transparent 45%);
+  color: #f1dfbc;
+}
+
+.quest-markdown {
+  position: relative;
+  color: #2f1c10;
+  font-family: 'Cormorant Garamond', serif;
+}
+
+.quest-markdown > :first-child {
   margin-top: 0;
-  margin-bottom: 10px;
-  font-size: 1.5rem;
-  color: #ffda85;
 }
 
-.quest-content p {
-  margin-bottom: 20px;
-  line-height: 1.4;
-  font-size: 1rem;
+.quest-markdown > :last-child {
+  margin-bottom: 0;
 }
 
-.quest-content button {
-  padding: 8px 20px;
-  font-size: 1rem;
-  color: #f5ead0;
-  background: linear-gradient(#7b4b1a, #a67c52);
-  border: 2px solid #d4b885;
+.quest-markdown h1,
+.quest-markdown h2,
+.quest-markdown h3,
+.quest-markdown h4 {
+  margin: 1.1em 0 0.45em;
+  color: #2c1b10;
+  line-height: 1.08;
+}
+
+.quest-markdown h1 {
+  font-size: clamp(2.1rem, 3.2vw, 2.9rem);
+}
+
+.quest-markdown h2 {
+  font-size: clamp(1.75rem, 2.6vw, 2.3rem);
+}
+
+.quest-markdown h3,
+.quest-markdown h4 {
+  font-size: clamp(1.35rem, 2vw, 1.75rem);
+}
+
+.quest-markdown p,
+.quest-markdown li,
+.quest-markdown blockquote {
+  font-size: clamp(1.2rem, 1.7vw, 1.45rem);
+  font-weight: 600;
+  line-height: 1.55;
+}
+
+.quest-markdown p,
+.quest-markdown ul,
+.quest-markdown ol,
+.quest-markdown blockquote,
+.quest-markdown pre,
+.quest-markdown hr {
+  margin: 0 0 1rem;
+}
+
+.quest-markdown ul,
+.quest-markdown ol {
+  padding-left: 1.5rem;
+}
+
+.quest-markdown blockquote {
+  padding: 0.2rem 0 0.2rem 1rem;
+  border-left: 3px solid rgba(135, 88, 38, 0.55);
+  color: rgba(63, 39, 19, 0.88);
+}
+
+.quest-markdown code,
+.quest-markdown pre {
+  font-family: Consolas, 'Courier New', monospace;
+}
+
+.quest-markdown code {
+  padding: 0.1rem 0.35rem;
   border-radius: 6px;
-  cursor: pointer;
-  transition: transform 0.1s ease, background 0.3s ease;
+  background: rgba(78, 50, 25, 0.12);
+  font-size: 0.92em;
 }
 
-.quest-content button:hover {
-  transform: scale(1.05);
-  background: linear-gradient(#8a5c2f, #b58a64);
+.quest-markdown pre {
+  padding: 0.9rem 1rem;
+  border-radius: 12px;
+  background: rgba(67, 40, 18, 0.14);
+  overflow: auto;
+}
+
+.quest-markdown pre code {
+  padding: 0;
+  background: transparent;
+}
+
+.quest-markdown hr {
+  border: 0;
+  border-top: 1px solid rgba(126, 79, 34, 0.28);
+}
+
+.quest-markdown a {
+  color: #6a3a0d;
+}
+
+.murloc-surprise {
+  position: fixed;
+  right: 0;
+  bottom: 0;
+  z-index: 60;
+  pointer-events: none;
+  opacity: 0;
+  transform: translate3d(24%, 120%, 0);
+  transition:
+    transform 0.55s cubic-bezier(0.2, 0.9, 0.22, 1),
+    opacity 0.2s ease-out;
+}
+
+.murloc-surprise.is-visible {
+  opacity: 1;
+  transform: translate3d(-18px, -14px, 0);
+}
+
+.murloc-surprise img {
+  display: block;
+  width: clamp(220px, 30vw, 360px);
+  height: auto;
+  filter: drop-shadow(0 20px 24px rgba(0, 0, 0, 0.55));
+}
+
+@keyframes board-rise {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 980px) {
+  .adventure-board {
+    padding: 20px;
+  }
+
+  .adventure-header {
+    flex-direction: column;
+    align-items: stretch;
+    padding: 16px 16px 18px;
+  }
+
+  .blog-logout-button {
+    align-self: center;
+  }
+
+  .board-body {
+    grid-template-columns: 1fr;
+  }
+
+  #backpack.inventory-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .quest-content {
+    min-height: 360px;
+  }
+
+  .quest-modal {
+    max-height: calc(100vh - 44px);
+  }
+}
+
+@media (max-width: 640px) {
+  .adventure-board {
+    padding: 16px;
+  }
+
+  .adventure-header {
+    margin-bottom: 18px;
+    padding: 14px 14px 16px;
+  }
+
+  #backpack.inventory-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .inventory-panel,
+  #quest-box.quest-panel {
+    padding: 14px;
+  }
+
+  .quest-banner {
+    margin-left: 4px;
+    margin-right: 4px;
+    padding: 14px 18px;
+  }
+
+  .quest-content {
+    padding: 38px 18px 22px;
+  }
+
+  .accept-button {
+    min-width: 150px;
+    width: 100%;
+  }
+
+  .quest-overlay {
+    padding: 14px 10px;
+  }
+
+  .quest-modal {
+    padding: 14px;
+    max-height: calc(100vh - 24px);
+  }
+
+  .quest-modal-actions {
+    flex-direction: column;
+  }
+
+  .quest-action-button {
+    width: 100%;
+    min-width: 0;
+  }
 }

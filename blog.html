@@ -7,28 +7,95 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Cormorant+Garamond:wght@500;600;700&display=swap"
       rel="stylesheet"
     />
     <link rel="stylesheet" href="css/style.css" />
+    <script defer src="js/post-markdown.js"></script>
     <script defer src="js/blog.js"></script>
   </head>
-  <body>
-    <header class="header-bar">
-      <h1>Adventurer's Backpack</h1>
-      <p class="subtitle">
-        Click an item to read a quest-style blog post. Items in grayscale are
-        coming soon.
-      </p>
-    </header>
-    <main id="backpack"></main>
-    <!-- Quest style pop-up -->
-    <div id="quest-box" class="hidden">
-      <div class="quest-content">
-        <h2 id="quest-title"></h2>
-        <p id="quest-text"></p>
-        <button id="close-quest">Close</button>
-      </div>
+  <body class="blog-page">
+    <main class="blog-shell">
+      <section class="adventure-board" aria-label="Adventure journal">
+        <header class="adventure-header">
+          <div class="adventure-copy">
+            <p class="adventure-kicker">Warrior's Journal</p>
+            <h1>My Adventures</h1>
+            <p class="subtitle">
+              Select an item to open a quest-style memory. Faded relics are
+              still coming soon.
+            </p>
+          </div>
+        </header>
+
+        <div class="board-body">
+          <section class="inventory-panel" aria-label="Adventure entries">
+            <div id="backpack" class="inventory-grid"></div>
+            <p class="inventory-hint">
+              New tales appear here as the campaign continues.
+            </p>
+          </section>
+
+          <section id="quest-box" class="quest-panel" aria-live="polite">
+            <div class="quest-banner">
+              <span id="quest-title" class="quest-banner-title"></span>
+            </div>
+
+            <article class="quest-content">
+              <div class="quest-meta">
+                <p id="quest-status" class="quest-label">Quest Summary</p>
+                <p id="quest-date" class="quest-label quest-date"></p>
+              </div>
+              <h2 id="quest-heading"></h2>
+              <p id="quest-text"></p>
+            </article>
+
+            <div class="quest-actions">
+              <button id="read-quest" class="accept-button" type="button">
+                Read
+              </button>
+            </div>
+          </section>
+        </div>
+      </section>
+
+      <a class="logout-button blog-logout-button" href="index.html">Logout</a>
+    </main>
+
+    <div id="quest-overlay" class="quest-overlay hidden" aria-hidden="true">
+      <div class="quest-overlay-backdrop" data-close-quest="true"></div>
+
+      <section
+        class="quest-modal"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="quest-modal-title"
+      >
+        <div class="quest-banner quest-modal-banner">
+          <span id="quest-modal-title" class="quest-banner-title"></span>
+        </div>
+
+        <article class="quest-content quest-modal-content">
+          <div id="quest-markdown" class="quest-markdown"></div>
+        </article>
+
+        <div class="quest-modal-actions">
+          <button id="complete-quest" class="quest-action-button" type="button">
+            Complete Quest
+          </button>
+          <button
+            id="cancel-quest"
+            class="quest-action-button quest-action-button-cancel"
+            type="button"
+          >
+            Cancel
+          </button>
+        </div>
+      </section>
+    </div>
+
+    <div id="murloc-surprise" class="murloc-surprise" aria-hidden="true">
+      <img src="assets/murloc.png" alt="" />
     </div>
   </body>
 </html>

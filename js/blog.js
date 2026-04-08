@@ -1,108 +1,532 @@
-/*
- * blog.js
- *
- * This script populates the backpack interface on the blog page with blog
- * entries. Each entry appears as an item in a faux inventory grid. Clicking
- * available entries opens a quest-like panel displaying the post title and
- * content. Coming soon items are visually muted and cannot be interacted
- * with.
- */
-
 document.addEventListener('DOMContentLoaded', () => {
   const backpack = document.getElementById('backpack');
-  const questBox = document.getElementById('quest-box');
   const questTitle = document.getElementById('quest-title');
+  const questHeading = document.getElementById('quest-heading');
+  const questStatus = document.getElementById('quest-status');
+  const questDate = document.getElementById('quest-date');
   const questText = document.getElementById('quest-text');
-  const closeQuestBtn = document.getElementById('close-quest');
+  const questBox = document.getElementById('quest-box');
+  const readQuestBtn = document.getElementById('read-quest');
+  const questOverlay = document.getElementById('quest-overlay');
+  const questModalTitle = document.getElementById('quest-modal-title');
+  const questMarkdown = document.getElementById('quest-markdown');
+  const completeQuestBtn = document.getElementById('complete-quest');
+  const cancelQuestBtn = document.getElementById('cancel-quest');
+  const logoutButton = document.querySelector('.logout-button');
+  const murlocSurprise = document.getElementById('murloc-surprise');
 
-  // Define your blog posts. The description fields can be replaced with real
-  // content once you write your posts. Available entries are clickable.
-  const posts = [
+  const embeddedMarkdown = globalThis.POST_MARKDOWN || {};
+  const markdownCache = new Map();
+  const soundPaths = {
+    open: 'sounds/open.ogg',
+    complete: 'sounds/complete.ogg',
+    exit: 'sounds/exit.ogg',
+    select: 'sounds/select.ogg',
+    murloc: 'sounds/murloc.ogg',
+  };
+  const soundEffects = Object.fromEntries(
+    Object.entries(soundPaths).map(([key, path]) => {
+      const audio = new Audio(path);
+      audio.preload = 'auto';
+      return [key, audio];
+    })
+  );
+  const postDefinitions = [
     {
       id: 'deadmines',
       title: 'Deadmines',
       image: 'assets/deadmines.png',
-      description:
-        'Join me as I delve into the classic Deadmines dungeon. I’ll share tips for clearing it efficiently, my favorite loot, and memories from my first run.',
-      available: true,
+      postedDate: '8th of April - 2026',
+      summary:
+        'At level 18, we ventured into the shadowy mines of Westfall to face the Defias Brotherhood. Treacherous paths, goblin miners, and the fearsome Captain Cookie awaited us. It was an adventure filled with danger and loot.',
     },
     {
       id: 'mount',
       title: 'Mount',
       image: 'assets/mount.png',
-      description:
-        'Getting your first mount is a rite of passage. In this entry I recount my journey to level 40, how I farmed the gold and the joy of finally riding through Azeroth.',
-      available: true,
+      postedDate: '8th of April - 2026',
+      summary:
+        'Getting a first mount always feels like the world suddenly opens up. This journal entry follows the gold grind, the level push, and the relief of finally riding across Azeroth at a proper pace.',
     },
     {
       id: 'gnomeregan',
       title: 'Gnomeregan',
       image: 'assets/gnomeregan.png',
-      description:
-        'Exploring Gnomeregan’s mechanical depths was an unforgettable experience. Discover the quirks of this gnomish city and how to survive its hazards.',
-      available: true,
+      postedDate: '8th of April - 2026',
+      summary:
+        'Gnomeregan is all sparks, tunnels, and chaos. I wrote this one as a field report on the city\'s broken machinery, the long pulls, and the strange charm of one of Classic\'s messiest dungeons.',
     },
     {
       id: 'whirlwindaxe',
       title: 'Whirlwind Axe',
       image: 'assets/whirlwindaxe.png',
-      description:
-        'The Whirlwind Axe is a warrior’s badge of honor. Here I outline the quest chain, strategies to complete it at lower levels and why this weapon is so iconic.',
-      available: true,
+      postedDate: '8th of April - 2026',
+      summary:
+        'The Whirlwind Axe quest chain feels like a true warrior trial. This story covers the preparation, the level disadvantage, and why earning that weapon still feels more memorable than most upgrades.',
     },
     {
       id: 'scarlet',
       title: 'Scarlet Monastery',
       image: 'assets/scarlet_monastery.png',
-      description: 'This post is coming soon. Stay tuned for tales from the Scarlet Monastery!',
-      available: false,
+      postedDate: '8th of April - 2026',
+      summary:
+        'This chapter is still being written. The Scarlet Monastery run is coming soon, with cathedral pulls, loot highlights, and a few stories that deserve their own parchment.',
     },
     {
       id: 'flyingmounts',
       title: 'Flying Mounts',
       image: 'assets/flying_mounts.png',
-      description: 'This post is coming soon. I can’t wait to take to the skies on a flying mount!',
-      available: false,
+      postedDate: '8th of April - 2026',
+      summary:
+        'Flying mounts are not ready for this journal yet. Once the tale lands, it will cover the long wait, the cost, and the first view from above the world.',
     },
   ];
 
-  // Helper function to create a slot element
+  let activePost = null;
+  let activeSlot = null;
+  let clickTimestamps = [];
+  let murlocHideTimer = null;
+  let posts = [];
+
+  readQuestBtn.disabled = true;
+  readQuestBtn.setAttribute('aria-disabled', 'true');
+
+  function getMarkdownPath(id) {
+    return `posts/${id}.md`;
+  }
+
+  function playSound(name) {
+    const audio = soundEffects[name];
+
+    if (!audio) {
+      return;
+    }
+
+    try {
+      audio.pause();
+      audio.currentTime = 0;
+
+      const playPromise = audio.play();
+
+      if (playPromise && typeof playPromise.catch === 'function') {
+        playPromise.catch(() => {});
+      }
+    } catch (error) {
+      // Ignore audio playback failures so the UI keeps working.
+    }
+  }
+
+  function showMurlocSurprise() {
+    if (!murlocSurprise) {
+      return;
+    }
+
+    playSound('murloc');
+    murlocSurprise.classList.add('is-visible');
+    murlocSurprise.setAttribute('aria-hidden', 'false');
+
+    if (murlocHideTimer) {
+      window.clearTimeout(murlocHideTimer);
+    }
+
+    murlocHideTimer = window.setTimeout(() => {
+      murlocSurprise.classList.remove('is-visible');
+      murlocSurprise.setAttribute('aria-hidden', 'true');
+      murlocHideTimer = null;
+    }, 4000);
+  }
+
+  function escapeHtml(text) {
+    return text
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+
+  function parseInlineMarkdown(text) {
+    let html = escapeHtml(text);
+
+    html = html.replace(/`([^`]+)`/g, '<code>$1</code>');
+    html = html.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noreferrer">$1</a>');
+    html = html.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+    html = html.replace(/\*([^*]+)\*/g, '<em>$1</em>');
+
+    return html;
+  }
+
+  function renderMarkdown(markdown) {
+    const lines = markdown.replace(/\r\n?/g, '\n').split('\n');
+    const html = [];
+    let paragraph = [];
+    let listType = null;
+    let blockquote = [];
+    let codeFence = [];
+    let inCodeFence = false;
+
+    function flushParagraph() {
+      if (!paragraph.length) {
+        return;
+      }
+
+      html.push(`<p>${parseInlineMarkdown(paragraph.join(' '))}</p>`);
+      paragraph = [];
+    }
+
+    function flushList() {
+      if (!listType) {
+        return;
+      }
+
+      html.push(listType === 'ol' ? '</ol>' : '</ul>');
+      listType = null;
+    }
+
+    function flushBlockquote() {
+      if (!blockquote.length) {
+        return;
+      }
+
+      html.push(`<blockquote><p>${parseInlineMarkdown(blockquote.join(' '))}</p></blockquote>`);
+      blockquote = [];
+    }
+
+    function flushCodeFence() {
+      if (!codeFence.length) {
+        return;
+      }
+
+      html.push(`<pre><code>${escapeHtml(codeFence.join('\n'))}</code></pre>`);
+      codeFence = [];
+    }
+
+    lines.forEach((line) => {
+      const trimmed = line.trim();
+      const headingMatch = trimmed.match(/^(#{1,6})\s+(.*)$/);
+      const orderedListMatch = trimmed.match(/^\d+\.\s+(.*)$/);
+      const unorderedListMatch = trimmed.match(/^[-*]\s+(.*)$/);
+      const blockquoteMatch = trimmed.match(/^>\s?(.*)$/);
+
+      if (trimmed.startsWith('```')) {
+        flushParagraph();
+        flushList();
+        flushBlockquote();
+
+        if (inCodeFence) {
+          flushCodeFence();
+          inCodeFence = false;
+        } else {
+          inCodeFence = true;
+        }
+
+        return;
+      }
+
+      if (inCodeFence) {
+        codeFence.push(line);
+        return;
+      }
+
+      if (!trimmed) {
+        flushParagraph();
+        flushList();
+        flushBlockquote();
+        return;
+      }
+
+      if (headingMatch) {
+        flushParagraph();
+        flushList();
+        flushBlockquote();
+        html.push(
+          `<h${headingMatch[1].length}>${parseInlineMarkdown(headingMatch[2])}</h${headingMatch[1].length}>`
+        );
+        return;
+      }
+
+      if (/^(-{3,}|\*{3,})$/.test(trimmed)) {
+        flushParagraph();
+        flushList();
+        flushBlockquote();
+        html.push('<hr />');
+        return;
+      }
+
+      if (blockquoteMatch) {
+        flushParagraph();
+        flushList();
+        blockquote.push(blockquoteMatch[1]);
+        return;
+      }
+
+      if (unorderedListMatch) {
+        flushParagraph();
+        flushBlockquote();
+
+        if (listType !== 'ul') {
+          flushList();
+          html.push('<ul>');
+          listType = 'ul';
+        }
+
+        html.push(`<li>${parseInlineMarkdown(unorderedListMatch[1])}</li>`);
+        return;
+      }
+
+      if (orderedListMatch) {
+        flushParagraph();
+        flushBlockquote();
+
+        if (listType !== 'ol') {
+          flushList();
+          html.push('<ol>');
+          listType = 'ol';
+        }
+
+        html.push(`<li>${parseInlineMarkdown(orderedListMatch[1])}</li>`);
+        return;
+      }
+
+      flushList();
+      flushBlockquote();
+      paragraph.push(trimmed);
+    });
+
+    flushParagraph();
+    flushList();
+    flushBlockquote();
+    flushCodeFence();
+
+    return html.join('');
+  }
+
+  function getMarkdownPresentation(markdown, fallbackTitle) {
+    const normalized = markdown.replace(/\r\n?/g, '\n').trim();
+    const titleMatch = normalized.match(/^#\s+(.+?)\n+/);
+
+    if (!titleMatch) {
+      return {
+        title: fallbackTitle,
+        html: renderMarkdown(normalized),
+      };
+    }
+
+    return {
+      title: titleMatch[1].trim(),
+      html: renderMarkdown(normalized.slice(titleMatch[0].length)),
+    };
+  }
+
+  async function resolvePost(post) {
+    const markdownPath = getMarkdownPath(post.id);
+    const cachedMarkdown = embeddedMarkdown[post.id];
+
+    if (typeof cachedMarkdown === 'string' && cachedMarkdown.trim()) {
+      markdownCache.set(post.id, cachedMarkdown);
+
+      return {
+        ...post,
+        available: true,
+        markdownPath,
+      };
+    }
+
+    if (window.location.protocol === 'file:') {
+      return {
+        ...post,
+        available: false,
+        markdownPath,
+      };
+    }
+
+    try {
+      const response = await fetch(markdownPath);
+
+      if (!response.ok) {
+        return {
+          ...post,
+          available: false,
+          markdownPath,
+        };
+      }
+
+      const markdown = await response.text();
+
+      if (!markdown.trim()) {
+        return {
+          ...post,
+          available: false,
+          markdownPath,
+        };
+      }
+
+      markdownCache.set(post.id, markdown);
+
+      return {
+        ...post,
+        available: true,
+        markdownPath,
+      };
+    } catch (error) {
+      return {
+        ...post,
+        available: false,
+        markdownPath,
+      };
+    }
+  }
+
+  function setActivePost(post, slot) {
+    activePost = post;
+    questTitle.textContent = post.title;
+    questHeading.textContent = `The ${post.title}`;
+    questStatus.textContent = post.available ? 'Quest Summary' : 'Coming Soon';
+    questDate.textContent = post.postedDate || '';
+    questText.textContent = post.summary || 'This story summary has not been written yet.';
+    questBox.classList.toggle('is-coming-soon', !post.available);
+    readQuestBtn.disabled = !post.available;
+    readQuestBtn.setAttribute('aria-disabled', String(!post.available));
+
+    if (activeSlot) {
+      activeSlot.classList.remove('is-active');
+    }
+
+    if (slot) {
+      slot.classList.add('is-active');
+      activeSlot = slot;
+    }
+  }
+
+  function closeQuestOverlay() {
+    questOverlay.classList.add('hidden');
+    questOverlay.setAttribute('aria-hidden', 'true');
+    document.body.classList.remove('overlay-open');
+  }
+
+  function openQuestOverlay(post) {
+    const markdown = markdownCache.get(post.id);
+
+    if (!markdown) {
+      return;
+    }
+
+    const presentation = getMarkdownPresentation(markdown, post.title);
+
+    questModalTitle.textContent = presentation.title;
+    questMarkdown.innerHTML = presentation.html;
+    questOverlay.classList.remove('hidden');
+    questOverlay.setAttribute('aria-hidden', 'false');
+    document.body.classList.add('overlay-open');
+  }
+
   function createSlot(post) {
-    const slot = document.createElement('div');
-    slot.classList.add('slot');
+    const slot = document.createElement('button');
+    slot.className = 'slot';
+    slot.type = 'button';
+
     if (!post.available) {
       slot.classList.add('coming-soon');
     }
+
     const img = document.createElement('img');
     img.src = post.image;
     img.alt = post.title;
     slot.appendChild(img);
-    // Label for coming soon items
+
+    const title = document.createElement('span');
+    title.className = 'slot-title';
+    title.textContent = post.title;
+    slot.appendChild(title);
+
     if (!post.available) {
-      const label = document.createElement('div');
-      label.classList.add('coming-label');
-      label.textContent = 'Coming Soon';
-      slot.appendChild(label);
+      const status = document.createElement('span');
+      status.className = 'coming-label';
+      status.textContent = 'Coming Soon';
+      slot.appendChild(status);
     }
-    // Click handler for available items
-    if (post.available) {
-      slot.addEventListener('click', () => {
-        questTitle.textContent = post.title;
-        questText.textContent = post.description;
-        questBox.classList.remove('hidden');
-      });
-    }
+
+    slot.addEventListener('click', () => {
+      playSound('select');
+      setActivePost(post, slot);
+    });
+
     return slot;
   }
 
-  // Populate backpack grid
-  posts.forEach((post) => {
-    const slot = createSlot(post);
-    backpack.appendChild(slot);
+  async function initializeBlog() {
+    posts = await Promise.all(postDefinitions.map((post) => resolvePost(post)));
+
+    posts.forEach((post, index) => {
+      const slot = createSlot(post);
+      backpack.appendChild(slot);
+
+      if (index === 0) {
+        setActivePost(post, slot);
+      }
+    });
+  }
+
+  readQuestBtn.addEventListener('click', () => {
+    if (!activePost || !activePost.available) {
+      return;
+    }
+
+    playSound('open');
+    openQuestOverlay(activePost);
   });
 
-  // Close quest pop-up
-  closeQuestBtn.addEventListener('click', () => {
-    questBox.classList.add('hidden');
+  completeQuestBtn.addEventListener('click', () => {
+    playSound('complete');
+    closeQuestOverlay();
   });
+
+  cancelQuestBtn.addEventListener('click', () => {
+    playSound('exit');
+    closeQuestOverlay();
+  });
+
+  if (logoutButton) {
+    logoutButton.addEventListener('click', (event) => {
+      const href = logoutButton.getAttribute('href');
+
+      if (!href) {
+        return;
+      }
+
+      event.preventDefault();
+      playSound('exit');
+      window.setTimeout(() => {
+        window.location.href = href;
+      }, 180);
+    });
+  }
+
+  questOverlay.addEventListener('click', (event) => {
+    if (event.target instanceof HTMLElement && event.target.dataset.closeQuest === 'true') {
+      playSound('exit');
+      closeQuestOverlay();
+    }
+  });
+
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape' && !questOverlay.classList.contains('hidden')) {
+      playSound('exit');
+      closeQuestOverlay();
+    }
+  });
+
+  document.addEventListener('click', () => {
+    const now = window.performance.now();
+
+    clickTimestamps.push(now);
+    clickTimestamps = clickTimestamps.filter((timestamp) => now - timestamp <= 1000);
+
+    if (clickTimestamps.length >= 3) {
+      clickTimestamps = [];
+      showMurlocSurprise();
+    }
+  });
+
+  initializeBlog();
 });
