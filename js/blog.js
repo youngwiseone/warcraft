@@ -45,7 +45,7 @@ document.addEventListener('DOMContentLoaded', () => {
       image: 'assets/deadmines.png',
       postedDate: '8th of April - 2026',
       summary:
-        'At level 18, we ventured into the shadowy mines of Westfall to face the Defias Brotherhood. Treacherous paths, goblin miners, and the fearsome Captain Cookie awaited us. It was an adventure filled with danger and loot.',
+        'My first Deadmines run is me and a friend trying to build a group from scratch, getting lost in the outer tunnels, but managing to push through to the final boss',
     },
     {
       id: 'mount',
