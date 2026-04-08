@@ -1,21 +1,23 @@
-# Gnomeregan
+Gnomeregan is the first dungeon my friend got me to sort the grouping up for. I was very nervous had not been a part leader directly before, but was keen to run our next dungeon.
 
-Gnomeregan is one of those places that seems determined to defeat a group through confusion before it ever tries to kill anyone directly. The hallways twist, the pulls sprawl wider than expected, and every section looks like it could hide one more pack behind the next machine.
+I opened up our party on group finder (making sure to set myself from damage to tank with my friends help) and starting searching through for other players to join.
 
-## Into the Machinery
+Within just a couple minutes we had two mages and a rogue join our group. It was another gnome mage, a human rogue and a draenai mage. We let them know from the get go very new to this dungeon and did not know much about how it runs. Still intentionally trying to not learn too much about the proper way to run through everything so had not seen videos or walkthroughs on what to expect.
 
-The first impression is noise. Sparks, gears, alarms, and broken systems make the place feel unstable in the best possible way. It is a dungeon with personality, even when that personality is trying to wipe the party.
+However, both me and my friend had walked down through to the area where the dungeon portal was, mainly so I did not get lost again on the way there (like I did with deadmines!).
 
-We moved carefully, because rushing only made the place worse. Patrols wandered into fights at awkward angles, ranged enemies refused to behave, and the route constantly demanded more awareness than the average dungeon corridor.
+> Into the dungeon
 
-## Lessons From the Run
+The gnome mage ended up pointing us in the right direction most of the way through the dungeon. He seemed a lot less clueless than the rest of us. He pointed out the alert drones that patrolled around the machines in the area and said to be wary of them. We made sure to kill them whenever we got close, so still not too sure what they actually do.
 
-- Mark targets before the pull.
-- Respect line-of-sight whenever possible.
-- Never assume the next room is as empty as it looks.
+We slowly wrapped away around, taking out the Pats (New term learned for Patrols) with the mages blizzarding pretty much everything in AoE range while I did my best to tank and keep agro in the middle of it all.
 
-## Why I Like It Anyway
+> Mekgineer Thermaplugg
 
-Gnomeregan is messy, but that mess is part of its charm. It feels engineered by people who expected brilliant machines to save them, and then watched those machines spiral out of control.
+Once we finally reached the boss at the end, I was worried that this last fight would be a rough one. I made sure to use extra scrolls I had been keeping in my inventory while levelling just to get as much extra protection and strength as I had. With one final food buff, we charged in.
 
-By the end of the run, the chaos starts to feel coherent. You stop fighting the layout and start reading it. That is when Gnomeregan goes from frustrating to memorable.
+And it was actually quite a suprisingly easy fight. I don't know if we were just too high level for it at that point (round level 28-29) or just a really good group, but managed to take it out quite easily.
+
+Didn't even learn what the buttons were for until later after we beat the boss and just started spamming them hoping something cool would happen (seems they are interrupts for the fight if it had lasted longer).
+
+Got some good gloves from the dungeon, but now close enough to finally start working toward my whirlwind axe!

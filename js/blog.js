@@ -18,8 +18,8 @@ document.addEventListener('DOMContentLoaded', () => {
   const logoutButton = document.querySelector('.logout-button');
   const murlocSurprise = document.getElementById('murloc-surprise');
 
-  const embeddedMarkdown = globalThis.POST_MARKDOWN || {};
   const markdownCache = new Map();
+  const isFileProtocol = window.location.protocol === 'file:';
   const progressStorageKey = 'warcraft-blog-progress';
   const experiencePerQuest = 100;
   const experiencePerLevel = 300;
@@ -53,7 +53,7 @@ document.addEventListener('DOMContentLoaded', () => {
       image: 'assets/mount.png',
       postedDate: '8th of April - 2026',
       summary:
-        'Getting a first mount always feels like the world suddenly opens up. This journal entry follows the gold grind, the level push, and the relief of finally riding across Azeroth at a proper pace.',
+        'A short story about hitting level 30, getting unexpected help along the way, and finally unlocking my first mount with a friend.',
     },
     {
       id: 'gnomeregan',
@@ -61,7 +61,7 @@ document.addEventListener('DOMContentLoaded', () => {
       image: 'assets/gnomeregan.png',
       postedDate: '8th of April - 2026',
       summary:
-        'Gnomeregan is all sparks, tunnels, and chaos. I wrote this one as a field report on the city\'s broken machinery, the long pulls, and the strange charm of one of Classic\'s messiest dungeons.',
+        'My first time putting a dungeon group together, getting guided through Gnomeregan, and finding the final boss much easier than expected.',
     },
     {
       id: 'whirlwindaxe',
@@ -69,7 +69,7 @@ document.addEventListener('DOMContentLoaded', () => {
       image: 'assets/whirlwindaxe.png',
       postedDate: '8th of April - 2026',
       summary:
-        'The Whirlwind Axe quest chain feels like a true warrior trial. This story covers the preparation, the level disadvantage, and why earning that weapon still feels more memorable than most upgrades.',
+        'A short lead-up to the Whirlwind Axe quest, from hardcore memories and warrior advice to finally reaching level 30 and setting out for Ratchet.',
     },
     {
       id: 'scarlet',
@@ -431,23 +431,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
   async function resolvePost(post) {
     const markdownPath = getMarkdownPath(post.id);
-    const cachedMarkdown = embeddedMarkdown[post.id];
-
-    if (typeof cachedMarkdown === 'string' && cachedMarkdown.trim()) {
-      markdownCache.set(post.id, cachedMarkdown);
-
-      return {
-        ...post,
-        available: true,
-        markdownPath,
-      };
-    }
-
-    if (window.location.protocol === 'file:') {
+    if (isFileProtocol) {
       return {
         ...post,
         available: false,
         markdownPath,
+        statusLabel: 'Local Server Required',
+        unavailableSummary:
+          'Open the site through a local web server to load posts/*.md directly.',
       };
     }
 
@@ -459,6 +450,7 @@ document.addEventListener('DOMContentLoaded', () => {
           ...post,
           available: false,
           markdownPath,
+          statusLabel: 'Missing Post',
         };
       }
 
@@ -469,6 +461,7 @@ document.addEventListener('DOMContentLoaded', () => {
           ...post,
           available: false,
           markdownPath,
+          statusLabel: 'Empty Post',
         };
       }
 
@@ -484,6 +477,7 @@ document.addEventListener('DOMContentLoaded', () => {
         ...post,
         available: false,
         markdownPath,
+        statusLabel: 'Load Failed',
       };
     }
   }
@@ -492,9 +486,12 @@ document.addEventListener('DOMContentLoaded', () => {
     activePost = post;
     questTitle.textContent = post.title;
     questHeading.textContent = `The ${post.title}`;
-    questStatus.textContent = post.available ? 'Quest Summary' : 'Coming Soon';
+    questStatus.textContent = post.available ? 'Quest Summary' : post.statusLabel || 'Unavailable';
     questDate.textContent = post.postedDate || '';
-    questText.textContent = post.summary || 'This story summary has not been written yet.';
+    questText.textContent =
+      post.available
+        ? post.summary || 'This story summary has not been written yet.'
+        : post.unavailableSummary || post.summary || 'This post could not be loaded.';
     questBox.classList.toggle('is-coming-soon', !post.available);
     readQuestBtn.disabled = !post.available;
     readQuestBtn.setAttribute('aria-disabled', String(!post.available));
@@ -556,7 +553,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!post.available) {
       const status = document.createElement('span');
       status.className = 'coming-label';
-      status.textContent = 'Coming Soon';
+      status.textContent = post.statusLabel || 'Unavailable';
       slot.appendChild(status);
     }
 
