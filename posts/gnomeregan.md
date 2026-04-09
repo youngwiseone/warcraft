@@ -1,3 +1,11 @@
+<!-- posted: 2026-04-08 -->
+
+# Gnomeregan
+
+My first time putting a dungeon group together, getting guided through Gnomeregan, and finding the final boss much easier than expected.
+
+---
+
 Gnomeregan is the first dungeon my friend got me to sort the grouping up for. I was very nervous had not been a part leader directly before, but was keen to run our next dungeon.
 
 I opened up our party on group finder (making sure to set myself from damage to tank with my friends help) and starting searching through for other players to join.

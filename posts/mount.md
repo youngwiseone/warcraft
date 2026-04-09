@@ -1,4 +1,10 @@
+<!-- posted: 2026-04-08 -->
+
 # My First Mount
+
+A short story about hitting level 30, getting unexpected help along the way, and finally unlocking my first mount with a friend.
+
+---
 
 Started playing classic wow with the intention of hitting level 30 and getting a mount within a month (paid for 1 month membership and wasn't sure how much I would play). Since that point I have had 3 other friends join in on playing WoW, and the experience has been much better than I imagined!
 
@@ -19,5 +25,7 @@ His name was Gerthbrookz, and before he left to continue a different quest he ga
 It took quite a few nights of continued gameplay after that, ranking slowly from level 24, 25, 26, 27. Getting both me and my friends levels up in sync, levelling through both Lakeshire and Darkshire quests so we could unlock our first mounts together. Once we were finally nearing 30 I was excited to share I had enough gold for both of use to get the mounts at the same time.
 
 We headed over to Elwynn forest together to the lumber mill (righ next to the red shirt quest haha), and into the area with the houses and riding trainer. My friend gave me the honor of levelling up first and unlocking the mount. We both ended up choosing the Chestnut Mare (most badass), and just ran around for quite a while once we had it unlocked, really happy to finally get that significant movement boost after walking everywhere for so long.
+
+![Chestnut Mare](assets/mount.png)
 
 Next stop for us now was levelling up for our next dungeon, Gnomeregan

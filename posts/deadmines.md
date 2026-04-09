@@ -1,4 +1,10 @@
+<!-- posted: 2026-04-08 -->
+
 # The Deadmines
+
+My first Deadmines run is me and a friend trying to build a group from scratch, getting lost in the outer tunnels, but managing to push through to the final boss.
+
+---
 
 My first time levelling up to do the deadmines with my friend. Got quite far in a hardcore character a couple years back, but was always afraid to do many of the dungeons.
 

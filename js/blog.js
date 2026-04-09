@@ -38,56 +38,9 @@ document.addEventListener('DOMContentLoaded', () => {
       return [key, audio];
     })
   );
-  const postDefinitions = [
-    {
-      id: 'deadmines',
-      title: 'Deadmines',
-      image: 'assets/deadmines.png',
-      postedDate: '8th of April - 2026',
-      summary:
-        'My first Deadmines run is me and a friend trying to build a group from scratch, getting lost in the outer tunnels, but managing to push through to the final boss',
-    },
-    {
-      id: 'mount',
-      title: 'Mount',
-      image: 'assets/mount.png',
-      postedDate: '8th of April - 2026',
-      summary:
-        'A short story about hitting level 30, getting unexpected help along the way, and finally unlocking my first mount with a friend.',
-    },
-    {
-      id: 'gnomeregan',
-      title: 'Gnomeregan',
-      image: 'assets/gnomeregan.png',
-      postedDate: '8th of April - 2026',
-      summary:
-        'My first time putting a dungeon group together, getting guided through Gnomeregan, and finding the final boss much easier than expected.',
-    },
-    {
-      id: 'whirlwindaxe',
-      title: 'Whirlwind Axe',
-      image: 'assets/whirlwindaxe.png',
-      postedDate: '8th of April - 2026',
-      summary:
-        'A short lead-up to the Whirlwind Axe quest, from hardcore memories and warrior advice to finally reaching level 30 and setting out for Ratchet.',
-    },
-    {
-      id: 'scarlet',
-      title: 'Scarlet Monastery',
-      image: 'assets/scarlet_monastery.png',
-      postedDate: '8th of April - 2026',
-      summary:
-        'This chapter is still being written. The Scarlet Monastery run is coming soon, with cathedral pulls, loot highlights, and a few stories that deserve their own parchment.',
-    },
-    {
-      id: 'flyingmounts',
-      title: 'Flying Mounts',
-      image: 'assets/flying_mounts.png',
-      postedDate: '8th of April - 2026',
-      summary:
-        'Flying mounts are not ready for this journal yet. Once the tale lands, it will cover the long wait, the cost, and the first view from above the world.',
-    },
-  ];
+  const postManifest = Array.isArray(window.POST_MANIFEST)
+    ? window.POST_MANIFEST.filter((id) => typeof id === 'string' && id.trim())
+    : [];
 
   let activePost = null;
   let activeSlot = null;
@@ -101,8 +54,28 @@ document.addEventListener('DOMContentLoaded', () => {
   readQuestBtn.disabled = true;
   readQuestBtn.setAttribute('aria-disabled', 'true');
 
+  function titleFromId(id) {
+    return id
+      .split(/[_-]+/)
+      .filter(Boolean)
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(' ');
+  }
+
+  function getImagePath(id) {
+    return `assets/${id}.png`;
+  }
+
   function getMarkdownPath(id) {
     return `posts/${id}.md`;
+  }
+
+  function getPostDefinitions() {
+    return postManifest.map((id) => ({
+      id,
+      title: titleFromId(id),
+      image: getImagePath(id),
+    }));
   }
 
   function loadProgress() {
@@ -115,9 +88,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
       const parsedProgress = JSON.parse(rawProgress);
       const ids = Array.isArray(parsedProgress.completedPostIds) ? parsedProgress.completedPostIds : [];
-      const knownPostIds = new Set(postDefinitions.map(({ id }) => id));
 
-      return new Set(ids.filter((id) => typeof id === 'string' && knownPostIds.has(id)));
+      return new Set(ids.filter((id) => typeof id === 'string'));
     } catch (error) {
       return new Set();
     }
@@ -256,15 +228,124 @@ document.addEventListener('DOMContentLoaded', () => {
       .replace(/'/g, '&#39;');
   }
 
+  function extractMarkdownMetadata(markdown) {
+    const normalized = markdown.replace(/\r\n?/g, '\n');
+    const metadata = {};
+    let content = normalized;
+
+    while (true) {
+      const metadataMatch = content.match(
+        /^\s*<!--\s*([a-z][a-z0-9_-]*)\s*:\s*(.*?)\s*-->\s*\n*/i
+      );
+
+      if (!metadataMatch) {
+        break;
+      }
+
+      metadata[metadataMatch[1].toLowerCase()] = metadataMatch[2].trim();
+      content = content.slice(metadataMatch[0].length);
+    }
+
+    const postedIso = metadata.posted || '';
+    const postedTimestamp = postedIso ? Date.parse(`${postedIso}T00:00:00Z`) : Number.NaN;
+    const status = (metadata.status || '').toLowerCase();
+
+    return {
+      markdown: content,
+      status,
+      postedIso,
+      postedTimestamp,
+    };
+  }
+
+  function formatPostedDate(postedIso) {
+    if (!postedIso) {
+      return '';
+    }
+
+    const postedDate = new Date(`${postedIso}T00:00:00Z`);
+
+    if (Number.isNaN(postedDate.getTime())) {
+      return '';
+    }
+
+    return new Intl.DateTimeFormat('en-NZ', {
+      day: 'numeric',
+      month: 'short',
+      year: 'numeric',
+      timeZone: 'UTC',
+    }).format(postedDate);
+  }
+
   function parseInlineMarkdown(text) {
     let html = escapeHtml(text);
 
+    html = html.replace(
+      /!\[([^\]]*)\]\(([^)]+)\)/g,
+      '<img src="$2" alt="$1" loading="lazy" />'
+    );
     html = html.replace(/`([^`]+)`/g, '<code>$1</code>');
     html = html.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noreferrer">$1</a>');
     html = html.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
     html = html.replace(/\*([^*]+)\*/g, '<em>$1</em>');
 
     return html;
+  }
+
+  function getYouTubeEmbedUrl(url) {
+    try {
+      const parsedUrl = new URL(url, window.location.href);
+      const hostname = parsedUrl.hostname.replace(/^www\./, '');
+      let videoId = '';
+
+      if (hostname === 'youtu.be') {
+        videoId = parsedUrl.pathname.split('/').filter(Boolean)[0] || '';
+      } else if (
+        hostname === 'youtube.com' ||
+        hostname === 'm.youtube.com' ||
+        hostname === 'music.youtube.com' ||
+        hostname === 'youtube-nocookie.com'
+      ) {
+        if (parsedUrl.pathname === '/watch') {
+          videoId = parsedUrl.searchParams.get('v') || '';
+        } else if (parsedUrl.pathname.startsWith('/shorts/')) {
+          videoId = parsedUrl.pathname.split('/')[2] || '';
+        } else if (parsedUrl.pathname.startsWith('/embed/')) {
+          videoId = parsedUrl.pathname.split('/')[2] || '';
+        }
+      }
+
+      if (!/^[A-Za-z0-9_-]{11}$/.test(videoId)) {
+        return null;
+      }
+
+      return `https://www.youtube-nocookie.com/embed/${videoId}`;
+    } catch (error) {
+      return null;
+    }
+  }
+
+  function getMediaEmbedHtml(text) {
+    const explicitYouTubeMatch = text.match(/^!youtube\((.+)\)$/i);
+    const candidate = explicitYouTubeMatch ? explicitYouTubeMatch[1].trim() : text;
+    const youtubeEmbedUrl = getYouTubeEmbedUrl(candidate);
+
+    if (!youtubeEmbedUrl) {
+      return null;
+    }
+
+    return `
+      <div class="quest-video">
+        <iframe
+          src="${youtubeEmbedUrl}"
+          title="YouTube video player"
+          loading="lazy"
+          referrerpolicy="strict-origin-when-cross-origin"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+          allowfullscreen
+        ></iframe>
+      </div>
+    `;
   }
 
   function renderMarkdown(markdown) {
@@ -318,6 +399,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const orderedListMatch = trimmed.match(/^\d+\.\s+(.*)$/);
       const unorderedListMatch = trimmed.match(/^[-*]\s+(.*)$/);
       const blockquoteMatch = trimmed.match(/^>\s?(.*)$/);
+      const mediaEmbedHtml = getMediaEmbedHtml(trimmed);
 
       if (trimmed.startsWith('```')) {
         flushParagraph();
@@ -343,6 +425,14 @@ document.addEventListener('DOMContentLoaded', () => {
         flushParagraph();
         flushList();
         flushBlockquote();
+        return;
+      }
+
+      if (mediaEmbedHtml) {
+        flushParagraph();
+        flushList();
+        flushBlockquote();
+        html.push(mediaEmbedHtml);
         return;
       }
 
@@ -412,20 +502,38 @@ document.addEventListener('DOMContentLoaded', () => {
     return html.join('');
   }
 
-  function getMarkdownPresentation(markdown, fallbackTitle) {
-    const normalized = markdown.replace(/\r\n?/g, '\n').trim();
-    const titleMatch = normalized.match(/^#\s+(.+?)\n+/);
+  function stripMarkdownForPreview(markdown) {
+    return markdown
+      .replace(/\r\n?/g, '\n')
+      .replace(/^>\s?/gm, '')
+      .replace(/^#{1,6}\s+/gm, '')
+      .replace(/^[-*]\s+/gm, '')
+      .replace(/^\d+\.\s+/gm, '')
+      .replace(/^!youtube\((.+)\)$/gim, '')
+      .replace(/!\[([^\]]*)\]\(([^)]+)\)/g, '$1')
+      .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '$1')
+      .replace(/`([^`]+)`/g, '$1')
+      .replace(/\*\*([^*]+)\*\*/g, '$1')
+      .replace(/\*([^*]+)\*/g, '$1')
+      .replace(/^(-{3,}|\*{3,})$/gm, '')
+      .replace(/\s+/g, ' ')
+      .trim();
+  }
 
-    if (!titleMatch) {
-      return {
-        title: fallbackTitle,
-        html: renderMarkdown(normalized),
-      };
-    }
+  function getMarkdownPresentation(markdown) {
+    const normalized = markdown.replace(/\r\n?/g, '\n').trim();
+    const titleMatch = normalized.match(/^#\s+.+?\n+/);
+    const content = titleMatch ? normalized.slice(titleMatch[0].length).trim() : normalized;
+    const contentLines = content.split('\n');
+    const summarySeparatorIndex = contentLines.findIndex((line) => /^(-{3,}|\*{3,})$/.test(line.trim()));
+    const summaryMarkdown =
+      summarySeparatorIndex >= 0
+        ? contentLines.slice(0, summarySeparatorIndex).join('\n').trim()
+        : content;
 
     return {
-      title: titleMatch[1].trim(),
-      html: renderMarkdown(normalized.slice(titleMatch[0].length)),
+      html: renderMarkdown(content),
+      summary: stripMarkdownForPreview(summaryMarkdown),
     };
   }
 
@@ -467,10 +575,21 @@ document.addEventListener('DOMContentLoaded', () => {
 
       markdownCache.set(post.id, markdown);
 
+      const metadata = extractMarkdownMetadata(markdown);
+      const presentation = getMarkdownPresentation(metadata.markdown);
+      const isPlanned = metadata.status === 'planned';
+
       return {
         ...post,
-        available: true,
+        available: !isPlanned,
         markdownPath,
+        summary: presentation.summary || post.summary,
+        postedDate: formatPostedDate(metadata.postedIso),
+        sortDate: Number.isNaN(metadata.postedTimestamp) ? Number.POSITIVE_INFINITY : metadata.postedTimestamp,
+        statusLabel: isPlanned ? 'Coming Soon' : post.statusLabel,
+        unavailableSummary: isPlanned
+          ? presentation.summary || 'This post is planned but not readable yet.'
+          : post.unavailableSummary,
       };
     } catch (error) {
       return {
@@ -485,7 +604,7 @@ document.addEventListener('DOMContentLoaded', () => {
   function setActivePost(post, slot) {
     activePost = post;
     questTitle.textContent = post.title;
-    questHeading.textContent = `The ${post.title}`;
+    questHeading.textContent = post.title;
     questStatus.textContent = post.available ? 'Quest Summary' : post.statusLabel || 'Unavailable';
     questDate.textContent = post.postedDate || '';
     questText.textContent =
@@ -520,9 +639,10 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
 
-    const presentation = getMarkdownPresentation(markdown, post.title);
+    const metadata = extractMarkdownMetadata(markdown);
+    const presentation = getMarkdownPresentation(metadata.markdown);
 
-    questModalTitle.textContent = presentation.title;
+    questModalTitle.textContent = post.title;
     questMarkdown.innerHTML = presentation.html;
     openQuestPostId = post.id;
     questOverlay.classList.remove('hidden');
@@ -567,9 +687,25 @@ document.addEventListener('DOMContentLoaded', () => {
     return slot;
   }
 
+  function comparePosts(a, b) {
+    const aSortDate = Number.isFinite(a.sortDate) ? a.sortDate : Number.POSITIVE_INFINITY;
+    const bSortDate = Number.isFinite(b.sortDate) ? b.sortDate : Number.POSITIVE_INFINITY;
+
+    if (aSortDate !== bSortDate) {
+      return aSortDate - bSortDate;
+    }
+
+    return a.title.localeCompare(b.title, 'en', { sensitivity: 'base' });
+  }
+
   async function initializeBlog() {
     completedPostIds = loadProgress();
-    posts = await Promise.all(postDefinitions.map((post) => resolvePost(post)));
+    posts = await Promise.all(getPostDefinitions().map((post) => resolvePost(post)));
+    posts.sort(comparePosts);
+    completedPostIds = new Set(
+      [...completedPostIds].filter((postId) => posts.some((post) => post.id === postId))
+    );
+    saveProgress();
     slotElements = new Map();
     updateExperienceDisplay();
 

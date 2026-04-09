@@ -1,3 +1,11 @@
+<!-- posted: 2026-04-08 -->
+
+# Whirlwind Axe
+
+A short lead-up to the Whirlwind Axe quest, from hardcore memories and warrior advice to finally reaching level 30 and setting out for Ratchet.
+
+---
+
 The first time I heard of this axe was back when I started playing wow for the first time, straight into modded hardcore (yes, warrior modded hardcore was my first experience with WoW).
 
 It was from a streamer who was running around Darkshire, levelling up so that he would be able to do the quest without dying. I had no idea what the axe looked like, I had no idea what it did, but everyone in the chat seemed to by hyped up for the power boost it would give this player.
