@@ -1,6 +1,7 @@
 # Warcraft Journal Site
 
 This site is a static HTML/CSS/JS project. Posts are written in Markdown and loaded from the `posts/` folder.
+View the live site here: https://youngwiseone.github.io/warcraft/
 
 ## Run Locally
 
