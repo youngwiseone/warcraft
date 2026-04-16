@@ -33,7 +33,7 @@ Do not open `blog.html` directly with `file://...`, because the post Markdown fi
 - Underscores and hyphens become spaces.
 - Each word is capitalized.
 - Example: `whirlwind_axe.md` becomes `Whirlwind Axe`.
-- The slot image is read from `assets/<id>.png`.
+- The slot image is read from `assets/<id>.png`, with `assets/<id>.jpg` used as a fallback.
 - Example: `posts/mount.md` uses `assets/mount.png`.
 
 If you add, remove, or rename a file in `posts/`, regenerate the manifest:
@@ -48,7 +48,7 @@ If you only change the contents of an existing post, you do not need to rerun th
 
 1. Create a new Markdown file in `posts/`.
 2. Name it using lowercase words with underscores if needed.
-3. Add a matching PNG in `assets/`.
+3. Add a matching PNG or JPG in `assets/`.
 4. Run:
 
 ```powershell
@@ -75,6 +75,12 @@ Matching image:
 
 ```text
 assets/my_new_post.png
+```
+
+You can also use:
+
+```text
+assets/my_new_post.jpg
 ```
 
 ## Planned Post

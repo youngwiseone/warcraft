@@ -62,8 +62,8 @@ document.addEventListener('DOMContentLoaded', () => {
       .join(' ');
   }
 
-  function getImagePath(id) {
-    return `assets/${id}.png`;
+  function getImagePath(id, extension = 'png') {
+    return `assets/${id}.${extension}`;
   }
 
   function getMarkdownPath(id) {
@@ -75,6 +75,7 @@ document.addEventListener('DOMContentLoaded', () => {
       id,
       title: titleFromId(id),
       image: getImagePath(id),
+      fallbackImage: getImagePath(id, 'jpg'),
     }));
   }
 
@@ -661,6 +662,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const img = document.createElement('img');
     img.className = 'slot-art';
+    img.addEventListener(
+      'error',
+      () => {
+        if (post.fallbackImage && img.src !== new URL(post.fallbackImage, window.location.href).href) {
+          img.src = post.fallbackImage;
+        }
+      },
+      { once: true }
+    );
     img.src = post.image;
     img.alt = post.title;
     slot.appendChild(img);
