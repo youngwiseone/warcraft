@@ -2,6 +2,7 @@
 // Add or rename files in posts/, then rerun `node scripts/generate-post-manifest.js`.
 window.POST_MANIFEST = [
   "deadmines",
+  "fishing",
   "flying_mounts",
   "gnomeregan",
   "mount",
